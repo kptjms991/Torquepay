@@ -1,3 +1,4 @@
+-- DEPRECATED: base schema merged into 01_create_torquepay_schema.sql
 -- Create users/profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
