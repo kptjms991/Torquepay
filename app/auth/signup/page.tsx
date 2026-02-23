@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { signUpWithAdminCheck, isAuthConfigured } from "@/lib/supabase/auth"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
+import Link from "next/link"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -58,42 +59,6 @@ export default function SignUpPage() {
 
       setShowSuccess(true)
 
-      // If admin email, redirect to admin dashboard
-      if (email === "kptjms991@gmail.com") {
-        setTimeout(() => router.push("/admin"), 3000)
-      } else {
-        setTimeout(() => router.push("/auth/login"), 3000)
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create account")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const { data, error: signupError } = await signUpWithAdminCheck(email, password)
-
-      if (signupError) {
-        setError(signupError.message)
-        return
-      }
-
-      setShowSuccess(true)
-      
       // If admin email, redirect to admin dashboard
       if (email === "kptjms991@gmail.com") {
         setTimeout(() => router.push("/admin"), 3000)
