@@ -85,7 +85,7 @@ export const mfsService = {
     const supabase = createClient();
 
     // Hash the PIN (in production, use bcrypt)
-    const hashedPin = await this.hashPin(pin);
+    const hashedPin = await mfsService.hashPin(pin);
 
     const { data, error } = await supabase
       .from('profiles')
@@ -108,7 +108,7 @@ export const mfsService = {
 
     if (method === 'authenticator') {
       // Generate a TOTP secret
-      updateData.two_fa_secret = this.generateTotpSecret();
+      updateData.two_fa_secret = mfsService.generateTotpSecret();
     }
 
     const { data, error } = await supabase
@@ -193,12 +193,12 @@ export const mfsService = {
   },
 
   // Utility functions
-  private async hashPin(pin: string): Promise<string> {
+  hashPin: async (pin: string): Promise<string> => {
     // In production, use bcrypt or similar
     return Buffer.from(pin).toString('base64');
   },
 
-  private generateTotpSecret(): string {
+  generateTotpSecret: (): string => {
     // In production, use speakeasy or similar
     return Math.random().toString(36).substring(2, 15);
   },
