@@ -1,121 +1,255 @@
-# P2P Wallet - Deployment Guide
+# TorquePay Deployment & Environment Management Guide
 
-## Production Checklist
+## Environment Variable Management
 
-### Security
-- [x] Content Security Policy headers configured
-- [x] XSS protection headers enabled
-- [x] Rate limiting for API endpoints
-- [x] Input sanitization on all user inputs
-- [x] HTTPS enforced
-- [x] Secure cookie handling
-- [x] No sensitive data in logs
+### Local Development Setup
 
-### Performance
-- [x] Image optimization and lazy loading
-- [x] Virtual scrolling for large lists
-- [x] Service worker caching strategy
-- [x] Code splitting and dynamic imports
-- [x] CSS and JS minification
-- [x] CDN-ready asset paths
+1. **Create `.env.local`** (never commit):
+```bash
+cp .env.example .env.local
+```
 
-### Privacy
-- [x] End-to-end encryption enabled
-- [x] IP masking available
-- [x] No analytics by default
-- [x] No external tracking
-- [x] Local-first data storage
-- [x] P2P communication
+2. **Fill in your values**:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
-### Accessibility
-- [x] WCAG AA compliant
-- [x] Keyboard navigation support
-- [x] Screen reader compatible
-- [x] Min 44x44px touch targets
-- [x] Proper color contrast
-- [x] Focus indicators
+3. **Verify setup**:
+```bash
+npm run validate  # Should pass all checks
+```
 
-### Mobile
-- [x] PWA installable
-- [x] Offline support
-- [x] Safe area inset handling
-- [x] Haptic feedback
-- [x] Touch optimized
-- [x] Status bar color matching
+### Vercel Production Setup
 
-## Environment Variables
+**Via Vercel Dashboard**:
+1. Navigate to Project Settings → Environment Variables
+2. Add each variable with proper environment scope:
 
-Create `.env.local` with these values:
+| Variable | Scope | Value |
+|----------|-------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Production/Preview | Production Supabase URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production/Preview | Production anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production only | Production service role key |
+| `NEXT_PUBLIC_APP_URL` | Production | https://yourdomain.com |
 
-\`\`\`env
-NEXT_PUBLIC_CRYPTO_ENABLED=true
-NEXT_PUBLIC_E2EE_ENABLED=true
-NEXT_PUBLIC_IP_MASKING_ENABLED=true
-NEXT_PUBLIC_DEFAULT_PRIVACY_LEVEL=city
-NEXT_PUBLIC_WEBRTC_ENABLED=true
-NEXT_PUBLIC_PWA_ENABLED=true
-NEXT_PUBLIC_OFFLINE_MODE=true
-NEXT_PUBLIC_HAPTIC_FEEDBACK=true
-NEXT_PUBLIC_ANALYTICS_ENABLED=false
-DEBUG_MODE=false
-\`\`\`
+### Security Best Practices
 
-## Deployment to Vercel
+**DO**:
+- ✅ Use `.env.example` with placeholder values
+- ✅ Rotate secrets every 30-60 days
+- ✅ Use different keys for dev/staging/production
+- ✅ Store service keys in Vercel Encrypted Secrets only
+- ✅ Audit who has access to production secrets
+- ✅ Enable 2FA on Vercel account
 
-1. Push code to GitHub
-2. Connect repo to Vercel project
-3. Set environment variables in Vercel dashboard
-4. Enable Web Analytics (optional, privacy-first)
-5. Configure custom domain
-6. Deploy
+**DON'T**:
+- ❌ Commit `.env.local` to git
+- ❌ Share secrets via email/chat
+- ❌ Use production keys in development
+- ❌ Hardcode credentials in code
+- ❌ Log sensitive values
+- ❌ Use same keys for multiple environments
 
-\`\`\`bash
-vercel deploy --prod
-\`\`\`
+---
 
-## Local Development
+## Secret Rotation Schedule
 
-\`\`\`bash
+### Monthly (API Keys & Tokens)
+- Supabase Anon Key
+- API Gateway tokens
+- Third-party integration keys
+
+### Quarterly (Database Credentials)
+- Supabase Service Role Key
+- Database passwords
+
+### Rotation Procedure
+
+**Step 1: Generate New Secret** (in Supabase Dashboard)
+**Step 2: Update in Vercel** environment variables
+**Step 3: Redeploy** with new secrets
+**Step 4: Invalidate Old Secret** after 24 hours
+
+---
+
+## Staged Deployment Process
+
+### Stage 1: Local Development
+
+```bash
+# Install dependencies
 npm install
+
+# Validate environment
+npm run validate
+
+# Type checking
+npm run type-check
+
+# Run development server
 npm run dev
-\`\`\`
+# Visit http://localhost:3000
+```
 
-Visit `http://localhost:3000`
+### Stage 2: Staging Deployment
 
-## Build for Production
+**Prerequisites**:
+- [ ] All changes committed to feature branch
+- [ ] Code review approved
+- [ ] `npm run build` succeeds locally
+- [ ] Staging env vars set in Vercel
 
-\`\`\`bash
-npm run build
-npm start
-\`\`\`
+**Deploy**:
+```bash
+# Push to staging branch
+git push origin feature-branch
+# Vercel auto-deploys to preview URL
+```
 
-## Testing
+### Stage 3: Production Deployment
 
-- Run diagnostics: `npm run diagnose`
-- Test PWA: Use Chrome DevTools -> Application -> Service Workers
-- Test offline: DevTools -> Network -> Offline
-- Test accessibility: Use Lighthouse audits
+**Prerequisites**:
+- [ ] Staging tests passed
+- [ ] Database backups created
+- [ ] Team notified
 
-## Monitoring
+**Deploy**:
+```bash
+# Create PR to main, get approval
+# Merge to main (Vercel auto-deploys)
+# Or manual: vercel deploy --prod
+```
 
-- Check Vercel Analytics for performance metrics
-- Monitor Web Vitals (CLS, LCP, FID)
-- Track error rates via Sentry (optional)
+---
+
+## Pre-Deployment Checklist
+
+**Code Quality**:
+- [ ] All tests passing
+- [ ] No console errors/warnings
+- [ ] TypeScript type-check passes
+- [ ] ESLint passes
+- [ ] Code reviewed
+
+**Security**:
+- [ ] No hardcoded credentials in code
+- [ ] No secrets in commit history
+- [ ] Environment variables properly set
+- [ ] No sensitive data in logs
+
+**Performance**:
+- [ ] Build completes in <3 minutes
+- [ ] Bundle size < 200MB
+- [ ] Main thread blocked < 3s
+
+**Database**:
+- [ ] All migrations applied
+- [ ] RLS policies verified
+- [ ] Database backups created
+
+---
 
 ## Performance Targets
 
-- Lighthouse Score: 90+
-- First Contentful Paint: <2s
-- Largest Contentful Paint: <2.5s
-- Cumulative Layout Shift: <0.1
-- Time to Interactive: <3.8s
+| Metric | Target |
+|--------|--------|
+| Page Load Time (p99) | <2s |
+| API Response Time (p99) | <500ms |
+| Error Rate | <0.1% |
+| Database Query Time (p99) | <500ms |
+| Uptime | >99.9% |
+
+---
+
+## Rollback Procedures
+
+**Quick Rollback** (if critical issues):
+```bash
+# Option 1: Via Vercel Dashboard
+# Deployments → Find previous version → Rollback
+
+# Option 2: Via CLI
+vercel rollback
+
+# Option 3: Redeploy previous commit
+git checkout <stable-commit>
+vercel deploy --prod
+```
+
+---
+
+## Monitoring (First 24 Hours)
+
+### Every 15 minutes (First Hour)
+- Check error logs
+- Monitor dashboard response times
+- Verify no critical errors
+
+### Every Hour (First 24 Hours)
+- Review error rates
+- Check database performance
+- Monitor API response times
+
+### End of Day
+- Generate summary report
+- Document any issues
+- Update runbooks
+
+---
+
+## Post-Deployment Verification
+
+```bash
+# Test critical endpoints
+curl https://yourdomain.com/                    # Should load
+curl https://yourdomain.com/api/health         # Should return 200
+curl https://yourdomain.com/merchant            # Should load/redirect
+curl https://yourdomain.com/admin               # Should load/redirect
+```
+
+---
+
+## Incident Response
+
+**P1 (Critical)**: Service unavailable
+- Response time: < 5 minutes
+- Action: Immediate rollback or fix
+
+**P2 (High)**: Major feature broken
+- Response time: < 30 minutes
+- Action: Today
+
+**P3 (Medium)**: Minor issue
+- Response time: < 24 hours
+- Action: This sprint
+
+**P4 (Low)**: Documentation/cosmetic
+- Response time: < 1 week
+- Action: When convenient
+
+---
 
 ## Security Headers
 
-All security headers are automatically configured via `next.config.mjs`:
+All security headers configured via `next.config.mjs`:
 - X-Content-Type-Options
 - X-Frame-Options
 - X-XSS-Protection
 - Referrer-Policy
 - Permissions-Policy
 - Strict-Transport-Security
+
+---
+
+## Scaling Considerations
+
+As TorquePay grows:
+
+- Add Redis caching (Upstash) for frequently accessed data
+- Partition large transaction tables in Supabase
+- Use Vercel Edge Functions for API routes
+- Implement connection pooling for database
+- Add rate limiting per user/IP
