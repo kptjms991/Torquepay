@@ -1,103 +1,141 @@
-# P2P Wallet - Decentralized Communication App
+# TorquePay - Unified Payment Platform
 
-A privacy-first, decentralized communication platform with end-to-end encrypted messaging, secure voice/video calls, and crypto payments.
+A comprehensive payment platform combining merchant payment gateway (like SSLCommerz), consumer mobile wallet (like WeChat Pay/Alipay), and admin dashboard for platform operators.
 
-## Features
+## Architecture
 
-### Communication
-- End-to-end encrypted messaging with Signal Protocol
-- Real-time typing indicators
-- Message status tracking (sending/sent/read)
-- Group chat support
-- File sharing with E2EE
+TorquePay consists of three integrated user interfaces:
 
-### Calls
-- Voice and video calls with WebRTC
-- IP masking with relay-only routing
-- Call history and duration tracking
-- Screen sharing capability
-- 4-level privacy settings
+### 1. Merchant Dashboard (`/merchant`)
+- API Key management with test/live modes
+- Checkout configuration and customization
+- Transaction monitoring and settlement tracking
+- Revenue analytics and reporting
 
-### Payments
-- Crypto wallet with balance tracking
-- Send/receive money with QR codes
-- Transaction history
-- Offline transaction queueing
-- Real-time balance updates
+### 2. Admin Panel (`/admin`)
+- User and merchant management
+- KYC verification and approval
+- Real-time transaction monitoring
+- Dispute resolution and escalation
+- System settings and compliance configuration
 
-### Privacy & Security
-- No central authentication - uses Ed25519 keypairs
-- Local-first data storage
-- BIP39 recovery phrases
-- Biometric authentication support
-- IP address masking
-- No analytics or tracking
-- Open-source security audit ready
+### 3. MFS Consumer Wallet (`/dashboard`)
+- P2P money transfers
+- QR code payments (generate & scan)
+- Payment method management
+- Transaction PIN and 2FA security
+- Add money/top-up functionality
+- Transaction history and receipts
 
-### Performance
-- Virtual scrolling for infinite lists
-- Image lazy loading with blur placeholders
-- Service worker caching
-- Offline support with sync
-- Skeleton loading states
-- Smooth page transitions
+## Tech Stack
 
-### Accessibility
-- WCAG AA compliant
-- Keyboard navigation
-- Screen reader support
-- High contrast mode
-- VoiceOver/TalkBack compatible
-- 44px minimum touch targets
+- **Frontend**: Next.js 16, React 19, TypeScript
+- **Styling**: Tailwind CSS 4, shadcn/ui components
+- **Forms**: react-hook-form with zod validation
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **QR Code**: qrcode.react (generation), html5-qrcode (scanning)
+- **UI Tables**: shadcn/ui Table with sorting/pagination
+- **Real-time**: Supabase subscriptions
 
-### Mobile
-- Installable as PWA
-- iOS status bar integration
-- Safe area inset handling
-- Haptic feedback
-- Pull-to-refresh
-- Mobile-optimized UI
+## Prerequisites
+
+- Node.js 18+
+- Supabase account with configured database
+- Environment variables from `.env.example`
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 18+ or bun
-- Modern browser with WebRTC support
-
-### Installation
+### 1. Clone & Install
 
 \`\`\`bash
-# Clone the repo
-git clone <repo-url>
-cd p2p-wallet
-
-# Install dependencies
+git clone https://github.com/kptjms991/Torquepay.git
+cd Torquepay
 npm install
-
-# Start development server
-npm run dev
 \`\`\`
 
-Visit `http://localhost:3000`
+### 2. Configure Environment
 
-### First Time Setup
+Copy `.env.example` to `.env.local`:
 
-1. Enter a username
-2. Generate crypto identity (Ed25519 keypair)
-3. Backup recovery phrase securely
-4. Start using the app
+\`\`\`bash
+cp .env.example .env.local
+\`\`\`
 
-No email, no verification, no personal data required.
+Then fill in your Supabase credentials:
+\`\`\`env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+\`\`\`
+
+### 3. Verify Setup
+
+\`\`\`bash
+npm run validate  # Checks environment and dependencies
+npm run type-check  # TypeScript validation
+\`\`\`
+
+### 4. Start Development
+
+\`\`\`bash
+npm run dev
+# Open http://localhost:3000
+\`\`\`
+
+## Project Structure
+
+\`\`\`
+src/
+├── app/
+│   ├── merchant/          # Merchant dashboard routes
+│   ├── admin/             # Admin panel routes
+│   ├── dashboard/         # MFS wallet routes
+│   ├── send/              # P2P transfer page
+│   ├── payment-methods/   # Payment token management
+│   ├── qr/                # QR generation & scanning
+│   └── security/          # PIN & 2FA setup
+├── components/
+│   ├── merchant/          # Merchant-specific components
+│   ├── admin/             # Admin-specific components
+│   ├── mfs/               # Wallet components
+│   └── shared/            # Reusable components
+├── lib/
+│   ├── services/          # Business logic (merchant, admin, mfs)
+│   ├── supabase/          # Database client
+│   └── utils/             # Utilities (format, validation)
+└── types/
+    └── database.ts        # Supabase table interfaces
+\`\`\`
+
+## Key Features
+
+### Merchant Features
+- Generate unlimited API keys with public/secret key pairs
+- Configure webhook endpoints for payment notifications
+- Track all checkout sessions and payments
+- View settlement information
+- Test mode for development
+
+### Admin Features
+- User management with role-based access
+- Merchant KYC verification and approval workflow
+- Real-time transaction monitoring with filters
+- Dispute management with resolution notes
+- Commission and settlement configuration
+- System settings for email/SMS templates
+
+### Consumer Features
+- Instant P2P transfers between users
+- QR code payment generation (share or display)
+- QR code scanning for quick payments
+- Saved payment methods for faster transactions
+- Transaction PIN for security
+- Two-factor authentication with backup codes
+- Full transaction history with receipts
 
 ## Configuration
-
-Copy `.env.example` to `.env.local` and customize:
-
-\`\`\`env
-NEXT_PUBLIC_CRYPTO_ENABLED=true
-NEXT_PUBLIC_E2EE_ENABLED=true
-NEXT_PUBLIC_IP_MASKING_ENABLED=true
-NEXT_PUBLIC_PWA_ENABLED=true
 NEXT_PUBLIC_OFFLINE_MODE=true
 \`\`\`
 
